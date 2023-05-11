@@ -18,14 +18,14 @@ const registerUser = asyncHandler(async (request, response) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
   console.log("Hashed Password: ", hashedPassword);
-  const user = await User.create({
+  const user = new User({
     name,
     username,
     email,
     password: hashedPassword,
   });
 
-  console.log(`User created ${user}`);
+  console.log(user);
   if (user) {
     response.status(200).json({
       message: "Registered Successfully!",

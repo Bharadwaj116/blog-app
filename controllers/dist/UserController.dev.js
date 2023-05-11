@@ -56,20 +56,16 @@ var registerUser = asyncHandler(function _callee(request, response) {
         case 12:
           hashedPassword = _context.sent;
           console.log("Hashed Password: ", hashedPassword);
-          _context.next = 16;
-          return regeneratorRuntime.awrap(User.create({
+          user = new User({
             name: name,
             username: username,
             email: email,
             password: hashedPassword
-          }));
-
-        case 16:
-          user = _context.sent;
-          console.log("User created ".concat(user));
+          });
+          console.log(user);
 
           if (!user) {
-            _context.next = 22;
+            _context.next = 20;
             break;
           }
 
@@ -79,19 +75,19 @@ var registerUser = asyncHandler(function _callee(request, response) {
             email: user.email,
             bio: user.bio
           });
-          _context.next = 24;
+          _context.next = 22;
           break;
 
-        case 22:
+        case 20:
           response.status(400);
           throw new Error("User data is not valid");
 
-        case 24:
+        case 22:
           response.json({
             message: "Register the user"
           });
 
-        case 25:
+        case 23:
         case "end":
           return _context.stop();
       }
