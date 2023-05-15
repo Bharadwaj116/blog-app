@@ -3,7 +3,6 @@ const User = require("../models/userModel");
 
 const chooseTopics = asyncHandler(async (request, response) => {
   const { topics } = request.body;
-
   const userId = request.user.id;
 
   const user = await User.findById(userId);
@@ -14,15 +13,35 @@ const chooseTopics = asyncHandler(async (request, response) => {
   }
 
   const newTopics = topics.filter((topic) => {
-    return !user.selected_topics.some(
+    return !user.tabbartopics.some(
       (selectedTopic) => selectedTopic._id.toString() === topic._id.toString()
     );
   });
 
-  user.selected_topics = [
+  const defaultTopics = [
+    {
+      _id: "646209a1640608eec5778452",
+      topic: "Latest",
+      color: "black",
+      icon: "update",
+    },
+    {
+      _id: "646209a1640608eec5778453",
+      topic: "All",
+      color: "black",
+      icon: "file-document-multiple-outline",
+    },
+    {
+      _id:"646209a1640608eec5778454",
+      topic:"Featured",
+      color:"#3c873a",
+      icon:"star-face",
+    },
+  ];
+
+  const selectedTopics = [
     ...user.selected_topics,
     ...newTopics.map((topic) => ({
-      __v: 0,
       _id: topic._id,
       topic: topic.topic,
       value: topic.value,
@@ -30,6 +49,27 @@ const chooseTopics = asyncHandler(async (request, response) => {
       color: topic.color,
     })),
   ];
+
+  const topicsToAdd = [
+    ...defaultTopics.filter((defaultTopic) => {
+      return !user.tabbartopics.some(
+        (selectedTopic) => selectedTopic._id.toString() === defaultTopic._id
+      );
+    }),
+    ...newTopics.map((topic) => ({
+      _id: topic._id,
+      topic: topic.topic,
+      color: topic.color,
+      icon: topic.icon,
+    })),
+  ];
+
+  user.tabbartopics = [
+    ...user.tabbartopics,
+    ...topicsToAdd,
+  ];
+
+  user.selected_topics = selectedTopics;
 
   await user.save();
 
@@ -125,10 +165,29 @@ const getSelectedTopics = asyncHandler(async (request, response) => {
 
   response.status(200).json(selectedTopics);
 });
+const getTabBarTopics = asyncHandler(async (request, response) => {
+  const user = await User.findById(request.user.id);
+  if (!user) {
+    response.status(404);
+    throw new Error("User not found");
+  }
+
+  const tabbartopics = user.tabbartopics.map((topic) => {
+    return {
+      id: topic.id,
+      topic: topic.topic,
+      icon: topic.icon,
+      color: topic.color,
+    };
+  });
+
+  response.status(200).json(tabbartopics);
+});
 
 module.exports = {
   chooseTopics,
   updateSelectedTopics,
   getUsersBySelectedTopics,
   getSelectedTopics,
+  getTabBarTopics,
 };

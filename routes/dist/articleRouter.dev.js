@@ -25,7 +25,7 @@ var validateToken = require("../middleware/validateTokenHandler"); // const { Us
 
 router.route("/create").post(validateToken, createArticle);
 router.route("/get").get(getArticles);
-router.route("/getlatest").get(validateToken, getLatestArticleCards);
+router.route("/getlatest").post(validateToken, getLatestArticleCards);
 router.route("/").post(validateToken, GetArticle);
 router.route("/delete")["delete"](DeleteArticle);
 router.route("/updatearticle").put(UpdateArticle);

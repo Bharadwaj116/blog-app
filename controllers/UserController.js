@@ -27,6 +27,7 @@ const registerUser = asyncHandler(async (request, response) => {
 
   console.log(user);
   if (user) {
+    await user.save();
     response.status(200).json({
       message: "Registered Successfully!",
       _id: user.id,

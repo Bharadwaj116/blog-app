@@ -65,29 +65,33 @@ var registerUser = asyncHandler(function _callee(request, response) {
           console.log(user);
 
           if (!user) {
-            _context.next = 20;
+            _context.next = 22;
             break;
           }
 
+          _context.next = 19;
+          return regeneratorRuntime.awrap(user.save());
+
+        case 19:
           response.status(200).json({
             message: "Registered Successfully!",
             _id: user.id,
             email: user.email,
             bio: user.bio
           });
-          _context.next = 22;
+          _context.next = 24;
           break;
 
-        case 20:
+        case 22:
           response.status(400);
           throw new Error("User data is not valid");
 
-        case 22:
+        case 24:
           response.json({
             message: "Register the user"
           });
 
-        case 23:
+        case 25:
         case "end":
           return _context.stop();
       }

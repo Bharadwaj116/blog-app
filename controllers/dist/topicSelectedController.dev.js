@@ -19,7 +19,7 @@ var asyncHandler = require("express-async-handler");
 var User = require("../models/userModel");
 
 var chooseTopics = asyncHandler(function _callee(request, response) {
-  var topics, userId, user, newTopics;
+  var topics, userId, user, newTopics, defaultTopics, selectedTopics, topicsToAdd;
   return regeneratorRuntime.async(function _callee$(_context) {
     while (1) {
       switch (_context.prev = _context.next) {
@@ -42,13 +42,28 @@ var chooseTopics = asyncHandler(function _callee(request, response) {
 
         case 8:
           newTopics = topics.filter(function (topic) {
-            return !user.selected_topics.some(function (selectedTopic) {
+            return !user.tabbartopics.some(function (selectedTopic) {
               return selectedTopic._id.toString() === topic._id.toString();
             });
           });
-          user.selected_topics = [].concat(_toConsumableArray(user.selected_topics), _toConsumableArray(newTopics.map(function (topic) {
+          defaultTopics = [{
+            _id: "646209a1640608eec5778452",
+            topic: "Latest",
+            color: "black",
+            icon: "update"
+          }, {
+            _id: "646209a1640608eec5778453",
+            topic: "All",
+            color: "black",
+            icon: "file-document-multiple-outline"
+          }, {
+            _id: "646209a1640608eec5778454",
+            topic: "Featured",
+            color: "#3c873a",
+            icon: "star-face"
+          }];
+          selectedTopics = [].concat(_toConsumableArray(user.selected_topics), _toConsumableArray(newTopics.map(function (topic) {
             return {
-              __v: 0,
               _id: topic._id,
               topic: topic.topic,
               value: topic.value,
@@ -56,16 +71,30 @@ var chooseTopics = asyncHandler(function _callee(request, response) {
               color: topic.color
             };
           })));
-          _context.next = 12;
+          topicsToAdd = [].concat(_toConsumableArray(defaultTopics.filter(function (defaultTopic) {
+            return !user.tabbartopics.some(function (selectedTopic) {
+              return selectedTopic._id.toString() === defaultTopic._id;
+            });
+          })), _toConsumableArray(newTopics.map(function (topic) {
+            return {
+              _id: topic._id,
+              topic: topic.topic,
+              color: topic.color,
+              icon: topic.icon
+            };
+          })));
+          user.tabbartopics = [].concat(_toConsumableArray(user.tabbartopics), _toConsumableArray(topicsToAdd));
+          user.selected_topics = selectedTopics;
+          _context.next = 16;
           return regeneratorRuntime.awrap(user.save());
 
-        case 12:
+        case 16:
           response.status(200).json({
             success: true,
             message: "Selected topics added successfully"
           });
 
-        case 13:
+        case 17:
         case "end":
           return _context.stop();
       }
@@ -212,9 +241,48 @@ var getSelectedTopics = asyncHandler(function _callee4(request, response) {
     }
   });
 });
+var getTabBarTopics = asyncHandler(function _callee5(request, response) {
+  var user, tabbartopics;
+  return regeneratorRuntime.async(function _callee5$(_context5) {
+    while (1) {
+      switch (_context5.prev = _context5.next) {
+        case 0:
+          _context5.next = 2;
+          return regeneratorRuntime.awrap(User.findById(request.user.id));
+
+        case 2:
+          user = _context5.sent;
+
+          if (user) {
+            _context5.next = 6;
+            break;
+          }
+
+          response.status(404);
+          throw new Error("User not found");
+
+        case 6:
+          tabbartopics = user.tabbartopics.map(function (topic) {
+            return {
+              id: topic.id,
+              topic: topic.topic,
+              icon: topic.icon,
+              color: topic.color
+            };
+          });
+          response.status(200).json(tabbartopics);
+
+        case 8:
+        case "end":
+          return _context5.stop();
+      }
+    }
+  });
+});
 module.exports = {
   chooseTopics: chooseTopics,
   updateSelectedTopics: updateSelectedTopics,
   getUsersBySelectedTopics: getUsersBySelectedTopics,
-  getSelectedTopics: getSelectedTopics
+  getSelectedTopics: getSelectedTopics,
+  getTabBarTopics: getTabBarTopics
 };
