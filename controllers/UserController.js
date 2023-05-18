@@ -103,6 +103,7 @@ const followUser = asyncHandler(async (request, response) => {
   }
 
   user.followers.push(follower);
+  console.log("follower",follower)
 
   const currentUser = await User.findById(followerId);
   const isAlreadyFollowing = currentUser.following.some(
@@ -122,7 +123,7 @@ const followUser = asyncHandler(async (request, response) => {
 
   response.status(200).json({
     isfollowing: true,
-    message: "You have followed this user",
+    message: `You have followed ${user.username}`,
   });
 });
 
@@ -163,9 +164,58 @@ const unfollowUser = asyncHandler(async (request, response) => {
 
   response.status(200).json({
     isfollowing: false,
-    message: "You have unfollowed this user",
+    message:`You have followed ${user.username}` ,
   });
 });
+
+// const searchUsers = asyncHandler(async (req, res) => {
+//   try {
+//     const { query } = req.body;
+
+//     if (!query || !query.trim()) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Invalid Query!",
+//       });
+//     }
+
+//     const currentUser = await User.findById(req.user.id).populate(
+//       "selected_topics"
+//     );
+//     const users = await User.find({
+//       $or: [
+//         { name: { $regex: query, $options: "i" } },
+//         { username: { $regex: query, $options: "i" } },
+//       ],
+//     })
+//       .select("profileimage username name selected_topics")
+//       .exec();
+//     if (users.length === 0) {
+//       return res.status(404).json({
+//         message: "No authors found!",
+//       });
+//     }
+
+//     const filteredUsers = users
+//       .filter((user) => user._id.toString() !== currentUser._id.toString())
+//       .map((user) => {
+//         const selectedTopics = user.selected_topics.map((topic) => topic.topic);
+//         const isFollowing = currentUser.following.some(
+//           (following) => following._id.toString() === user._id.toString()
+//         );
+//         return {
+//           ...user.toObject(),
+//           selected_topics: selectedTopics,
+//           isfollowing: isFollowing,
+//         };
+//       });
+
+//     res.status(200).json(filteredUsers);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// });
 
 const searchUsers = asyncHandler(async (req, res) => {
   try {
@@ -181,21 +231,36 @@ const searchUsers = asyncHandler(async (req, res) => {
     const currentUser = await User.findById(req.user.id).populate(
       "selected_topics"
     );
-    const users = await User.find({
-      $or: [
-        { name: { $regex: query, $options: "i" } },
-        { username: { $regex: query, $options: "i" } },
-      ],
+
+    // Segment 1: Search by username
+    const usersByUsername = await User.find({
+      username: { $regex: query, $options: "i" },
     })
       .select("profileimage username name selected_topics")
       .exec();
-    if (users.length === 0) {
+
+    // Segment 2: Search by name
+    const usersByName = await User.find({
+      name: { $regex: query, $options: "i" },
+    })
+      .select("profileimage username name selected_topics")
+      .exec();
+
+    const mergedUsers = [...usersByUsername, ...usersByName];
+
+    // Remove duplicates
+    const uniqueUsers = mergedUsers.filter(
+      (user, index, self) =>
+        index === self.findIndex((u) => u._id.toString() === user._id.toString())
+    );
+
+    if (uniqueUsers.length === 0) {
       return res.status(404).json({
         message: "No authors found!",
       });
     }
 
-    const filteredUsers = users
+    const filteredUsers = uniqueUsers
       .filter((user) => user._id.toString() !== currentUser._id.toString())
       .map((user) => {
         const selectedTopics = user.selected_topics.map((topic) => topic.topic);
@@ -215,6 +280,7 @@ const searchUsers = asyncHandler(async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
 
 const getAllUsers = asyncHandler(async (req, res) => {
   try {

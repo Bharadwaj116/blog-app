@@ -55,7 +55,7 @@ var chooseTopics = asyncHandler(function _callee(request, response) {
             _id: "646209a1640608eec5778453",
             topic: "All",
             color: "black",
-            icon: "file-document-multiple-outline"
+            icon: "file-document-outline"
           }, {
             _id: "646209a1640608eec5778454",
             topic: "Featured",

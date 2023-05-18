@@ -76,7 +76,7 @@ const NavBarProfile = asyncHandler(async (request, response) => {
     } 
 
     const user = await User.findById(userId).select(
-      "_id profileimage username name bio selected_topics createdMonthYear profile_tagline user_location posts followers following profile_tagline selected_topics"
+      "_id profileimage username name bio user_website user_linkedin user_twitter user_stack alter_email selected_topics user_skills createdMonthYear profile_tagline user_location posts followers following profile_tagline selected_topics"
     );
 
     if (!user) {
@@ -95,7 +95,11 @@ const NavBarProfile = asyncHandler(async (request, response) => {
     const selected_topics = user.selected_topics;
     const createdMonthYear = user.createdMonthYear;
     const user_location = user.user_location;
-
+    const user_website = user.user_website;
+    const user_twitter = user.user_twitter;
+    const user_stack = user.user_stack;
+    const user_linkedin = user.user_linkedin;
+    const user_skills = user.user_skills
     const currentUserId = request.user.id;
     const isCurrentUser = currentUserId.toString() === user._id.toString();
     const isfollowing = isCurrentUser
@@ -120,6 +124,11 @@ const NavBarProfile = asyncHandler(async (request, response) => {
       selected_topics,
       createdMonthYear,
       user_location,
+      user_skills,
+      user_linkedin,
+      user_stack,
+      user_twitter,
+      user_website
     });
   } catch (err) {
     console.error(err);

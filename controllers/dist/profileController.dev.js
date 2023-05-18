@@ -158,7 +158,7 @@ var UpdateUserProfile = asyncHandler(function _callee3(req, res) {
   }, null, null, [[0, 28]]);
 });
 var NavBarProfile = asyncHandler(function _callee4(request, response) {
-  var userId, user, userid, profileimage, username, name, postscount, followerscount, followingcount, bio, profile_tagline, selected_topics, createdMonthYear, user_location, currentUserId, isCurrentUser, isfollowing, currentuser;
+  var userId, user, userid, profileimage, username, name, postscount, followerscount, followingcount, bio, profile_tagline, selected_topics, createdMonthYear, user_location, user_website, user_twitter, user_stack, user_linkedin, user_skills, currentUserId, isCurrentUser, isfollowing, currentuser;
   return regeneratorRuntime.async(function _callee4$(_context4) {
     while (1) {
       switch (_context4.prev = _context4.next) {
@@ -171,7 +171,7 @@ var NavBarProfile = asyncHandler(function _callee4(request, response) {
           }
 
           _context4.next = 5;
-          return regeneratorRuntime.awrap(User.findById(userId).select("_id profileimage username name bio selected_topics createdMonthYear profile_tagline user_location posts followers following profile_tagline selected_topics"));
+          return regeneratorRuntime.awrap(User.findById(userId).select("_id profileimage username name bio user_website user_linkedin user_twitter user_stack alter_email selected_topics user_skills createdMonthYear profile_tagline user_location posts followers following profile_tagline selected_topics"));
 
         case 5:
           user = _context4.sent;
@@ -198,6 +198,11 @@ var NavBarProfile = asyncHandler(function _callee4(request, response) {
           selected_topics = user.selected_topics;
           createdMonthYear = user.createdMonthYear;
           user_location = user.user_location;
+          user_website = user.user_website;
+          user_twitter = user.user_twitter;
+          user_stack = user.user_stack;
+          user_linkedin = user.user_linkedin;
+          user_skills = user.user_skills;
           currentUserId = request.user.id;
           isCurrentUser = currentUserId.toString() === user._id.toString();
           isfollowing = isCurrentUser ? false : user.followers.some(function (follower) {
@@ -218,25 +223,30 @@ var NavBarProfile = asyncHandler(function _callee4(request, response) {
             profile_tagline: profile_tagline,
             selected_topics: selected_topics,
             createdMonthYear: createdMonthYear,
-            user_location: user_location
+            user_location: user_location,
+            user_skills: user_skills,
+            user_linkedin: user_linkedin,
+            user_stack: user_stack,
+            user_twitter: user_twitter,
+            user_website: user_website
           });
-          _context4.next = 31;
+          _context4.next = 36;
           break;
 
-        case 27:
-          _context4.prev = 27;
+        case 32:
+          _context4.prev = 32;
           _context4.t0 = _context4["catch"](0);
           console.error(_context4.t0);
           response.status(500).json({
             message: "Server error"
           });
 
-        case 31:
+        case 36:
         case "end":
           return _context4.stop();
       }
     }
-  }, null, null, [[0, 27]]);
+  }, null, null, [[0, 32]]);
 }); // const RecentActivity = asyncHandler(async (req, res) => {
 //   try {
 //     const articles = await Article.find({ user_id: req.user.id })

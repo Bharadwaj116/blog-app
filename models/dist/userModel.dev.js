@@ -68,6 +68,9 @@ var userSchema = mongoose.Schema({
   user_website: {
     type: String
   },
+  user_skills: {
+    type: String
+  },
   selected_topics: {
     type: [{
       _id: {

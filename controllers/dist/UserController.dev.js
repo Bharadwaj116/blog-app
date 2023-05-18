@@ -6,6 +6,14 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
 var asyncHandler = require("express-async-handler");
 
 var bcrypt = require("bcrypt");
@@ -243,17 +251,18 @@ var followUser = asyncHandler(function _callee4(request, response) {
 
         case 10:
           user.followers.push(follower);
-          _context4.next = 13;
+          console.log("follower", follower);
+          _context4.next = 14;
           return regeneratorRuntime.awrap(User.findById(followerId));
 
-        case 13:
+        case 14:
           currentUser = _context4.sent;
           isAlreadyFollowing = currentUser.following.some(function (following) {
             return following._id.toString() === userId.toString();
           });
 
           if (isAlreadyFollowing) {
-            _context4.next = 19;
+            _context4.next = 20;
             break;
           }
 
@@ -262,20 +271,20 @@ var followUser = asyncHandler(function _callee4(request, response) {
             username: user.username,
             isfollowing: true
           });
-          _context4.next = 19;
+          _context4.next = 20;
           return regeneratorRuntime.awrap(currentUser.save());
 
-        case 19:
-          _context4.next = 21;
+        case 20:
+          _context4.next = 22;
           return regeneratorRuntime.awrap(user.save());
 
-        case 21:
+        case 22:
           response.status(200).json({
             isfollowing: true,
-            message: "You have followed this user"
+            message: "You have followed ".concat(user.username)
           });
 
-        case 22:
+        case 23:
         case "end":
           return _context4.stop();
       }
@@ -341,7 +350,7 @@ var unfollowUser = asyncHandler(function _callee5(request, response) {
         case 22:
           response.status(200).json({
             isfollowing: false,
-            message: "You have unfollowed this user"
+            message: "You have followed ".concat(user.username)
           });
 
         case 23:
@@ -350,9 +359,53 @@ var unfollowUser = asyncHandler(function _callee5(request, response) {
       }
     }
   });
-});
+}); // const searchUsers = asyncHandler(async (req, res) => {
+//   try {
+//     const { query } = req.body;
+//     if (!query || !query.trim()) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Invalid Query!",
+//       });
+//     }
+//     const currentUser = await User.findById(req.user.id).populate(
+//       "selected_topics"
+//     );
+//     const users = await User.find({
+//       $or: [
+//         { name: { $regex: query, $options: "i" } },
+//         { username: { $regex: query, $options: "i" } },
+//       ],
+//     })
+//       .select("profileimage username name selected_topics")
+//       .exec();
+//     if (users.length === 0) {
+//       return res.status(404).json({
+//         message: "No authors found!",
+//       });
+//     }
+//     const filteredUsers = users
+//       .filter((user) => user._id.toString() !== currentUser._id.toString())
+//       .map((user) => {
+//         const selectedTopics = user.selected_topics.map((topic) => topic.topic);
+//         const isFollowing = currentUser.following.some(
+//           (following) => following._id.toString() === user._id.toString()
+//         );
+//         return {
+//           ...user.toObject(),
+//           selected_topics: selectedTopics,
+//           isfollowing: isFollowing,
+//         };
+//       });
+//     res.status(200).json(filteredUsers);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// });
+
 var searchUsers = asyncHandler(function _callee6(req, res) {
-  var query, _currentUser, users, filteredUsers;
+  var query, _currentUser, usersByUsername, usersByName, mergedUsers, uniqueUsers, filteredUsers;
 
   return regeneratorRuntime.async(function _callee6$(_context6) {
     while (1) {
@@ -379,24 +432,34 @@ var searchUsers = asyncHandler(function _callee6(req, res) {
           _currentUser = _context6.sent;
           _context6.next = 9;
           return regeneratorRuntime.awrap(User.find({
-            $or: [{
-              name: {
-                $regex: query,
-                $options: "i"
-              }
-            }, {
-              username: {
-                $regex: query,
-                $options: "i"
-              }
-            }]
+            username: {
+              $regex: query,
+              $options: "i"
+            }
           }).select("profileimage username name selected_topics").exec());
 
         case 9:
-          users = _context6.sent;
+          usersByUsername = _context6.sent;
+          _context6.next = 12;
+          return regeneratorRuntime.awrap(User.find({
+            name: {
+              $regex: query,
+              $options: "i"
+            }
+          }).select("profileimage username name selected_topics").exec());
 
-          if (!(users.length === 0)) {
-            _context6.next = 12;
+        case 12:
+          usersByName = _context6.sent;
+          mergedUsers = [].concat(_toConsumableArray(usersByUsername), _toConsumableArray(usersByName)); // Remove duplicates
+
+          uniqueUsers = mergedUsers.filter(function (user, index, self) {
+            return index === self.findIndex(function (u) {
+              return u._id.toString() === user._id.toString();
+            });
+          });
+
+          if (!(uniqueUsers.length === 0)) {
+            _context6.next = 17;
             break;
           }
 
@@ -404,8 +467,8 @@ var searchUsers = asyncHandler(function _callee6(req, res) {
             message: "No authors found!"
           }));
 
-        case 12:
-          filteredUsers = users.filter(function (user) {
+        case 17:
+          filteredUsers = uniqueUsers.filter(function (user) {
             return user._id.toString() !== _currentUser._id.toString();
           }).map(function (user) {
             var selectedTopics = user.selected_topics.map(function (topic) {
@@ -422,11 +485,11 @@ var searchUsers = asyncHandler(function _callee6(req, res) {
             });
           });
           res.status(200).json(filteredUsers);
-          _context6.next = 20;
+          _context6.next = 25;
           break;
 
-        case 16:
-          _context6.prev = 16;
+        case 21:
+          _context6.prev = 21;
           _context6.t0 = _context6["catch"](0);
           console.error(_context6.t0);
           res.status(500).json({
@@ -434,12 +497,12 @@ var searchUsers = asyncHandler(function _callee6(req, res) {
             message: "Server error"
           });
 
-        case 20:
+        case 25:
         case "end":
           return _context6.stop();
       }
     }
-  }, null, null, [[0, 16]]);
+  }, null, null, [[0, 21]]);
 });
 var getAllUsers = asyncHandler(function _callee7(req, res) {
   var users;

@@ -2,6 +2,14 @@
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -134,8 +142,8 @@ var GetArticle = asyncHandler(function _callee3(req, res) {
 
         case 10:
           articleUser = _context3.sent;
-          isfollowing = articleUser.following.some(function (follower) {
-            return follower._id.toString() === currentUser.id.toString();
+          isfollowing = articleUser.followers.some(function (follower) {
+            return follower._id.toString() === currentUser._id.toString();
           });
           isbookmarked = currentUser.bookmarks.find(function (bookmark) {
             return bookmark._id.toString() === article._id.toString();
@@ -586,7 +594,70 @@ var updateArticleViews = asyncHandler(function _callee10(req, res) {
       }
     }
   }, null, null, [[0, 12]]);
-});
+}); // const SearchArticles = asyncHandler(async (req, res) => {
+//   try {
+//     const { query } = req.body;
+//     if (!query || !query.trim()) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Invalid Query!",
+//       });
+//     }
+//     const currentUser = await User.findById(req.user.id);
+//     const articles = await Article.find({
+//       $or: [
+//         { article_title: { $regex: query, $options: "i" } },
+//         { article_sub: { $regex: query, $options: "i" } },
+//         { article_topic: { $regex: query, $options: "i" } },
+//         { user_name: { $regex: query, $options: "i" } },
+//         { "author.username": { $regex: query, $options: "i" } },
+//       ],
+//     })
+//       .select(
+//         "article_title article_sub article_image article_desc article_topic user_name user_image createdAt user_id article_clap clappedBy"
+//       )
+//       .sort({ createdAt: -1 })
+//       .populate("user_id", ["profileimage", "name"])
+//       .exec();
+//     if (articles.length === 0) {
+//       return res.status(404).json({
+//         message: "No articles found!",
+//       });
+//     }
+//     for (let i = 0; i < articles.length; i++) {
+//       const authorId = articles[i].user_id._id;
+//       const author = await User.findById(authorId);
+//       const user_image = author.profileimage;
+//       const user_name = author.name;
+//       // const isfollowing = author.followers.some(
+//       //   (follower) => follower._id.toString() === currentUser._id.toString()
+//       // );
+//       const isfollowing = currentUser.following.some(
+//         (following) => following._id.toString() === authorId.toString()
+//       );
+//       const currentuser = authorId.toString() === req.user.id.toString();
+//       const clappedByCurrentUser = articles[i].clappedBy.find(
+//         (clapper) => clapper._id.toString() === currentUser._id.toString()
+//       );
+//       const isclapped = clappedByCurrentUser
+//         ? clappedByCurrentUser.isclapped
+//         : false;
+//       articles[i] = {
+//         ...articles[i].toObject(),
+//         isfollowing,
+//         currentuser,
+//         isclapped,
+//         user_image,
+//         user_name,
+//       };
+//     }
+//     res.status(200).json(articles);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// });
+
 var SearchArticles = asyncHandler(function _callee12(req, res) {
   var _ret;
 
@@ -597,7 +668,7 @@ var SearchArticles = asyncHandler(function _callee12(req, res) {
           _context14.prev = 0;
           _context14.next = 3;
           return regeneratorRuntime.awrap(function _callee11() {
-            var query, currentUser, articles, _loop2, i;
+            var query, currentUser, articlesByFields, articlesByAuthor, mergedArticles, uniqueArticles, _loop2, i;
 
             return regeneratorRuntime.async(function _callee11$(_context13) {
               while (1) {
@@ -640,7 +711,16 @@ var SearchArticles = asyncHandler(function _callee12(req, res) {
                           $regex: query,
                           $options: "i"
                         }
-                      }, {
+                      }]
+                    }).select("article_title article_sub article_image article_desc article_topic user_name user_image createdAt user_id article_clap clappedBy").sort({
+                      createdAt: -1
+                    }).populate("user_id", ["profileimage", "name"]).exec());
+
+                  case 8:
+                    articlesByFields = _context13.sent;
+                    _context13.next = 11;
+                    return regeneratorRuntime.awrap(Article.find({
+                      $or: [{
                         user_name: {
                           $regex: query,
                           $options: "i"
@@ -655,11 +735,18 @@ var SearchArticles = asyncHandler(function _callee12(req, res) {
                       createdAt: -1
                     }).populate("user_id", ["profileimage", "name"]).exec());
 
-                  case 8:
-                    articles = _context13.sent;
+                  case 11:
+                    articlesByAuthor = _context13.sent;
+                    mergedArticles = [].concat(_toConsumableArray(articlesByFields), _toConsumableArray(articlesByAuthor)); // Remove duplicates
 
-                    if (!(articles.length === 0)) {
-                      _context13.next = 11;
+                    uniqueArticles = mergedArticles.filter(function (article, index, self) {
+                      return index === self.findIndex(function (a) {
+                        return a._id.toString() === article._id.toString();
+                      });
+                    });
+
+                    if (!(uniqueArticles.length === 0)) {
+                      _context13.next = 16;
                       break;
                     }
 
@@ -669,33 +756,30 @@ var SearchArticles = asyncHandler(function _callee12(req, res) {
                       })
                     });
 
-                  case 11:
+                  case 16:
                     _loop2 = function _loop2(i) {
                       var authorId, author, user_image, user_name, isfollowing, currentuser, clappedByCurrentUser, isclapped;
                       return regeneratorRuntime.async(function _loop2$(_context12) {
                         while (1) {
                           switch (_context12.prev = _context12.next) {
                             case 0:
-                              authorId = articles[i].user_id._id;
+                              authorId = uniqueArticles[i].user_id._id;
                               _context12.next = 3;
                               return regeneratorRuntime.awrap(User.findById(authorId));
 
                             case 3:
                               author = _context12.sent;
                               user_image = author.profileimage;
-                              user_name = author.name; // const isfollowing = author.followers.some(
-                              //   (follower) => follower._id.toString() === currentUser._id.toString()
-                              // );
-
+                              user_name = author.name;
                               isfollowing = currentUser.following.some(function (following) {
                                 return following._id.toString() === authorId.toString();
                               });
                               currentuser = authorId.toString() === req.user.id.toString();
-                              clappedByCurrentUser = articles[i].clappedBy.find(function (clapper) {
+                              clappedByCurrentUser = uniqueArticles[i].clappedBy.find(function (clapper) {
                                 return clapper._id.toString() === currentUser._id.toString();
                               });
                               isclapped = clappedByCurrentUser ? clappedByCurrentUser.isclapped : false;
-                              articles[i] = _objectSpread({}, articles[i].toObject(), {
+                              uniqueArticles[i] = _objectSpread({}, uniqueArticles[i].toObject(), {
                                 isfollowing: isfollowing,
                                 currentuser: currentuser,
                                 isclapped: isclapped,
@@ -713,24 +797,24 @@ var SearchArticles = asyncHandler(function _callee12(req, res) {
 
                     i = 0;
 
-                  case 13:
-                    if (!(i < articles.length)) {
-                      _context13.next = 19;
+                  case 18:
+                    if (!(i < uniqueArticles.length)) {
+                      _context13.next = 24;
                       break;
                     }
 
-                    _context13.next = 16;
+                    _context13.next = 21;
                     return regeneratorRuntime.awrap(_loop2(i));
 
-                  case 16:
+                  case 21:
                     i++;
-                    _context13.next = 13;
+                    _context13.next = 18;
                     break;
 
-                  case 19:
-                    res.status(200).json(articles);
+                  case 24:
+                    res.status(200).json(uniqueArticles);
 
-                  case 20:
+                  case 25:
                   case "end":
                     return _context13.stop();
                 }
@@ -1002,7 +1086,75 @@ var GetUserBookmarks = asyncHandler(function _callee15(req, res) {
       }
     }
   });
-});
+}); // const SearchBookMarkedArticles = asyncHandler(async (req, res) => {
+//   try {
+//     const { query } = req.body;
+//     if (!query || !query.trim()) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Invalid Query!",
+//       });
+//     }
+//     const currentUser = await User.findById(req.user.id).populate("bookmarks");
+//     const bookmarks = currentUser.bookmarks.filter(
+//       (bookmark) => bookmark.isbookmarked
+//     );
+//     const articleIds = bookmarks.map((bookmark) => bookmark._id);
+//     const articles = await Article.find({
+//       _id: { $in: articleIds },
+//       $or: [
+//         { article_topic: { $regex: query, $options: "i" } },
+//         { article_title: { $regex: query, $options: "i" } },
+//         { user_name: { $regex: query, $options: "i" } },
+//       ],
+//     })
+//       .select(
+//         "article_title article_sub article_image article_desc article_topic user_name user_image createdAt user_id article_clap clappedBy"
+//       )
+//       .sort({ createdAt: -1 })
+//       .exec();
+//     if (articles.length === 0) {
+//       return res.status(404).json({
+//         message: "No authors found!",
+//       });
+//     }
+//     for (let i = 0; i < articles.length; i++) {
+//       const authorId = articles[i].user_id;
+//       const author = await User.findById(authorId);
+//       // const isfollowing = author.followers.some(
+//       //   (follower) => follower._id.toString() === currentUser._id.toString()
+//       // );
+//       const isfollowing = currentUser.following.some(
+//         (following) => following._id.toString() === authorId.toString()
+//       );
+//       const isbookmarked = currentUser.bookmarks.find(
+//         (bookmark) => bookmark._id.toString() === articles[i]._id.toString()
+//       );
+//       const currentuser = authorId.toString() === req.user.id.toString();
+//       const clappedByCurrentUser = articles[i].clappedBy.find(
+//         (clapper) => clapper._id.toString() === currentUser._id.toString()
+//       );
+//       const isclapped = clappedByCurrentUser
+//         ? clappedByCurrentUser.isclapped
+//         : false;
+//       articles[i] = {
+//         ...articles[i].toObject(),
+//         isfollowing,
+//         isbookmarked: isbookmarked ? isbookmarked.isbookmarked : false,
+//         currentuser,
+//         isclapped,
+//       };
+//     }
+//     res.status(200).json(articles);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Server Error!",
+//     });
+//   }
+// });
+
 var SearchBookMarkedArticles = asyncHandler(function _callee17(req, res) {
   var _ret2;
 
@@ -1013,7 +1165,7 @@ var SearchBookMarkedArticles = asyncHandler(function _callee17(req, res) {
           _context21.prev = 0;
           _context21.next = 3;
           return regeneratorRuntime.awrap(function _callee16() {
-            var query, currentUser, bookmarks, articleIds, articles, _loop4, i;
+            var query, currentUser, bookmarks, articleIds, articlesByFields, articlesByAuthor, mergedArticles, uniqueArticles, _loop4, i;
 
             return regeneratorRuntime.async(function _callee16$(_context20) {
               while (1) {
@@ -1044,7 +1196,8 @@ var SearchBookMarkedArticles = asyncHandler(function _callee17(req, res) {
                     });
                     articleIds = bookmarks.map(function (bookmark) {
                       return bookmark._id;
-                    });
+                    }); // Segment 1: Search by article fields
+
                     _context20.next = 10;
                     return regeneratorRuntime.awrap(Article.find({
                       _id: {
@@ -1060,21 +1213,38 @@ var SearchBookMarkedArticles = asyncHandler(function _callee17(req, res) {
                           $regex: query,
                           $options: "i"
                         }
-                      }, {
-                        user_name: {
-                          $regex: query,
-                          $options: "i"
-                        }
                       }]
                     }).select("article_title article_sub article_image article_desc article_topic user_name user_image createdAt user_id article_clap clappedBy").sort({
                       createdAt: -1
                     }).exec());
 
                   case 10:
-                    articles = _context20.sent;
+                    articlesByFields = _context20.sent;
+                    _context20.next = 13;
+                    return regeneratorRuntime.awrap(Article.find({
+                      _id: {
+                        $in: articleIds
+                      },
+                      user_name: {
+                        $regex: query,
+                        $options: "i"
+                      }
+                    }).select("article_title article_sub article_image article_desc article_topic user_name user_image createdAt user_id article_clap clappedBy").sort({
+                      createdAt: -1
+                    }).exec());
 
-                    if (!(articles.length === 0)) {
-                      _context20.next = 13;
+                  case 13:
+                    articlesByAuthor = _context20.sent;
+                    mergedArticles = [].concat(_toConsumableArray(articlesByFields), _toConsumableArray(articlesByAuthor)); // Remove duplicates
+
+                    uniqueArticles = mergedArticles.filter(function (article, index, self) {
+                      return index === self.findIndex(function (a) {
+                        return a._id.toString() === article._id.toString();
+                      });
+                    });
+
+                    if (!(uniqueArticles.length === 0)) {
+                      _context20.next = 18;
                       break;
                     }
 
@@ -1084,34 +1254,31 @@ var SearchBookMarkedArticles = asyncHandler(function _callee17(req, res) {
                       })
                     });
 
-                  case 13:
+                  case 18:
                     _loop4 = function _loop4(i) {
                       var authorId, author, isfollowing, isbookmarked, currentuser, clappedByCurrentUser, isclapped;
                       return regeneratorRuntime.async(function _loop4$(_context19) {
                         while (1) {
                           switch (_context19.prev = _context19.next) {
                             case 0:
-                              authorId = articles[i].user_id;
+                              authorId = uniqueArticles[i].user_id;
                               _context19.next = 3;
                               return regeneratorRuntime.awrap(User.findById(authorId));
 
                             case 3:
                               author = _context19.sent;
-                              // const isfollowing = author.followers.some(
-                              //   (follower) => follower._id.toString() === currentUser._id.toString()
-                              // );
                               isfollowing = currentUser.following.some(function (following) {
                                 return following._id.toString() === authorId.toString();
                               });
                               isbookmarked = currentUser.bookmarks.find(function (bookmark) {
-                                return bookmark._id.toString() === articles[i]._id.toString();
+                                return bookmark._id.toString() === uniqueArticles[i]._id.toString();
                               });
                               currentuser = authorId.toString() === req.user.id.toString();
-                              clappedByCurrentUser = articles[i].clappedBy.find(function (clapper) {
+                              clappedByCurrentUser = uniqueArticles[i].clappedBy.find(function (clapper) {
                                 return clapper._id.toString() === currentUser._id.toString();
                               });
                               isclapped = clappedByCurrentUser ? clappedByCurrentUser.isclapped : false;
-                              articles[i] = _objectSpread({}, articles[i].toObject(), {
+                              uniqueArticles[i] = _objectSpread({}, uniqueArticles[i].toObject(), {
                                 isfollowing: isfollowing,
                                 isbookmarked: isbookmarked ? isbookmarked.isbookmarked : false,
                                 currentuser: currentuser,
@@ -1128,24 +1295,24 @@ var SearchBookMarkedArticles = asyncHandler(function _callee17(req, res) {
 
                     i = 0;
 
-                  case 15:
-                    if (!(i < articles.length)) {
-                      _context20.next = 21;
+                  case 20:
+                    if (!(i < uniqueArticles.length)) {
+                      _context20.next = 26;
                       break;
                     }
 
-                    _context20.next = 18;
+                    _context20.next = 23;
                     return regeneratorRuntime.awrap(_loop4(i));
 
-                  case 18:
+                  case 23:
                     i++;
-                    _context20.next = 15;
+                    _context20.next = 20;
                     break;
 
-                  case 21:
-                    res.status(200).json(articles);
+                  case 26:
+                    res.status(200).json(uniqueArticles);
 
-                  case 22:
+                  case 27:
                   case "end":
                     return _context20.stop();
                 }
