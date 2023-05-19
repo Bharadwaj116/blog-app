@@ -19,6 +19,7 @@ app.use("/api/selected", require("./routes/topicSelectedRouter"));
 app.use("/api/topic", require("./routes/topicMainRouter"));
 app.use("/api/profile", require("./routes/profileRouter"));
 app.use("/api/followunfollow", require("./routes/followUnfollowRouter"));
+app.use("/api/email", require("./routes/googleMailRouter"));
 app.use(errorHandler);
 app.listen(port, function () {
   console.log("Server running on port ".concat(port));

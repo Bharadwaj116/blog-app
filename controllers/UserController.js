@@ -5,15 +5,18 @@ const User = require("../models/userModel");
 // const regex = new RegExp(`^${searchTerm}`, 'i');
 
 const registerUser = asyncHandler(async (request, response) => {
+  try{
   const { name, username, email, password } = request.body;
   if (!username || !email || !password) {
-    response.status(400);
-    throw new Error("All fields are mandatory!");
+    return response.status(404).json({
+      message: "All fields are mandatory!",
+    });
   }
   const userAvailable = await User.findOne({ email });
   if (userAvailable) {
-    response.status(400);
-    throw new Error("User already registered!");
+    return response.status(404).json({
+      message: "User already registered!",
+    });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -29,17 +32,20 @@ const registerUser = asyncHandler(async (request, response) => {
   if (user) {
     await user.save();
     response.status(200).json({
-      message: "Registered Successfully!",
-      _id: user.id,
-      email: user.email,
-      bio: user.bio,
+      message: "Registered Successfully!"
     });
   } else {
-    response.status(400);
-    throw new Error("User data is not valid");
+    return response.status(404).json({
+      message: "User data is not valid",
+    });
   }
-  response.json({ message: "Register the user" });
+  response.status(200).json({ message: "Register the user" });
+}catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
 });
+
 
 const loginUser = asyncHandler(async (request, response) => {
   const { email, password } = request.body;

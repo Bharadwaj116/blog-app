@@ -30,6 +30,7 @@ var registerUser = asyncHandler(function _callee(request, response) {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
+          _context.prev = 0;
           _request$body = request.body, name = _request$body.name, username = _request$body.username, email = _request$body.email, password = _request$body.password;
 
           if (!(!username || !email || !password)) {
@@ -37,8 +38,9 @@ var registerUser = asyncHandler(function _callee(request, response) {
             break;
           }
 
-          response.status(400);
-          throw new Error("All fields are mandatory!");
+          return _context.abrupt("return", response.status(404).json({
+            message: "All fields are mandatory!"
+          }));
 
         case 4:
           _context.next = 6;
@@ -50,18 +52,19 @@ var registerUser = asyncHandler(function _callee(request, response) {
           userAvailable = _context.sent;
 
           if (!userAvailable) {
-            _context.next = 10;
+            _context.next = 9;
             break;
           }
 
-          response.status(400);
-          throw new Error("User already registered!");
+          return _context.abrupt("return", response.status(404).json({
+            message: "User already registered!"
+          }));
 
-        case 10:
-          _context.next = 12;
+        case 9:
+          _context.next = 11;
           return regeneratorRuntime.awrap(bcrypt.hash(password, 10));
 
-        case 12:
+        case 11:
           hashedPassword = _context.sent;
           console.log("Hashed Password: ", hashedPassword);
           user = new User({
@@ -73,38 +76,47 @@ var registerUser = asyncHandler(function _callee(request, response) {
           console.log(user);
 
           if (!user) {
-            _context.next = 22;
+            _context.next = 21;
             break;
           }
 
-          _context.next = 19;
+          _context.next = 18;
           return regeneratorRuntime.awrap(user.save());
 
-        case 19:
+        case 18:
           response.status(200).json({
-            message: "Registered Successfully!",
-            _id: user.id,
-            email: user.email,
-            bio: user.bio
+            message: "Registered Successfully!"
           });
-          _context.next = 24;
+          _context.next = 22;
           break;
 
-        case 22:
-          response.status(400);
-          throw new Error("User data is not valid");
+        case 21:
+          return _context.abrupt("return", response.status(404).json({
+            message: "User data is not valid"
+          }));
 
-        case 24:
-          response.json({
+        case 22:
+          response.status(200).json({
             message: "Register the user"
           });
+          _context.next = 29;
+          break;
 
         case 25:
+          _context.prev = 25;
+          _context.t0 = _context["catch"](0);
+          console.error(_context.t0);
+          res.status(500).json({
+            success: false,
+            message: "Server error"
+          });
+
+        case 29:
         case "end":
           return _context.stop();
       }
     }
-  });
+  }, null, null, [[0, 25]]);
 });
 var loginUser = asyncHandler(function _callee2(request, response) {
   var _request$body2, email, password, user, accessToken;
