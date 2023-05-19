@@ -55,10 +55,10 @@ var mailSender = asyncHandler(function _callee(req, res) {
           });
           _context.next = 11;
           return regeneratorRuntime.awrap(transporter.sendMail({
-            from: 'Blog App' + sender,
+            from: 'Blog App <saibharadwaj116@gmail.com>',
             to: recipient,
-            subject: subject,
-            text: message,
+            subject: "Google Gmail Verification Process",
+            text: "Google Gmail Verification Succeeded",
             html: htmlContent
           }));
 

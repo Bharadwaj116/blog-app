@@ -39,10 +39,10 @@ const mailSender = asyncHandler(async (req, res) => {
     });
 
     const info = await transporter.sendMail({
-      from:'Blog App' + sender,
+      from:'Blog App <saibharadwaj116@gmail.com>',
       to: recipient,
-      subject: subject,
-      text: message,
+      subject: "Google Gmail Verification Process",
+      text: "Google Gmail Verification Succeeded",
       html: htmlContent, 
     });
 
