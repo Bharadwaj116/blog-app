@@ -9,8 +9,7 @@ var nodemailer = require("nodemailer");
 
 var dotenv = require("dotenv");
 
-var fs = require("fs").promises; // const { promisify } = require("util");
-
+var fs = require("fs").promises;
 
 dotenv.config();
 var clientid = process.env.CLIENT_ID;
@@ -20,8 +19,7 @@ var refreshtoken = process.env.REFRESH_TOKEN;
 var oAuth2Client = new google.auth.OAuth2(clientid, clientsecret, redirecturi);
 oAuth2Client.setCredentials({
   refresh_token: refreshtoken
-}); // const readFileAsync = promisify(fs.readFile);
-
+});
 var mailSender = asyncHandler(function _callee(req, res) {
   var _req$body, sender, recipient, subject, message, htmlContent, accessToken, transporter, info;
 

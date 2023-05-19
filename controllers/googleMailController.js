@@ -3,7 +3,6 @@ const {google} = require("googleapis");
 const nodemailer = require("nodemailer");
 const dotenv = require("dotenv");
 const fs = require("fs").promises;
-// const { promisify } = require("util");
 
 dotenv.config();
 
@@ -15,7 +14,6 @@ const refreshtoken = process.env.REFRESH_TOKEN
 const oAuth2Client = new google.auth.OAuth2(clientid,clientsecret,redirecturi)
 oAuth2Client.setCredentials({refresh_token:refreshtoken})
 
-// const readFileAsync = promisify(fs.readFile);
 
 const mailSender = asyncHandler(async (req, res) => {
   const { sender, recipient, subject, message } = req.body;
