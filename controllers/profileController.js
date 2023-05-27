@@ -73,7 +73,7 @@ const NavBarProfile = asyncHandler(async (request, response) => {
 
     if (request.body.userId) {
       userId = request.body.userId;
-    } 
+    }
 
     const user = await User.findById(userId).select(
       "_id profileimage username name bio user_website user_linkedin user_twitter user_stack alter_email selected_topics user_skills createdMonthYear profile_tagline user_location posts followers following profile_tagline selected_topics"
@@ -99,7 +99,7 @@ const NavBarProfile = asyncHandler(async (request, response) => {
     const user_twitter = user.user_twitter;
     const user_stack = user.user_stack;
     const user_linkedin = user.user_linkedin;
-    const user_skills = user.user_skills
+    const user_skills = user.user_skills;
     const currentUserId = request.user.id;
     const isCurrentUser = currentUserId.toString() === user._id.toString();
     const isfollowing = isCurrentUser
@@ -128,7 +128,7 @@ const NavBarProfile = asyncHandler(async (request, response) => {
       user_linkedin,
       user_stack,
       user_twitter,
-      user_website
+      user_website,
     });
   } catch (err) {
     console.error(err);
@@ -176,7 +176,6 @@ const RecentActivity = asyncHandler(async (req, res) => {
       .select("article_title createdMonthYear article_sub user_id")
       .sort({ createdAt: -1 });
 
-
     const groupedArticles = _(articles)
       .groupBy("createdMonthYear")
       .map((articles, createdMonthYear) => ({
@@ -195,7 +194,6 @@ const RecentActivity = asyncHandler(async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
 
 module.exports = {
   AuthorProfileView,

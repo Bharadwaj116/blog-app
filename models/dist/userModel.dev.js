@@ -9,8 +9,8 @@ var userSchema = mongoose.Schema({
   },
   username: {
     type: String,
-    required: [true, "Please add the user name"],
-    unique: [true, "Username already taken"]
+    required: [true, "Please add the user name"] // unique: [true, "Username already taken"],
+
   },
   email: {
     type: String,
@@ -19,11 +19,9 @@ var userSchema = mongoose.Schema({
   },
   alter_email: {
     type: String,
-    unique: [true, "Email address already taken"]
-  },
-  password: {
-    type: String,
-    required: [true, "Please add the user password"]
+    unique: [true, "Email address already taken"],
+    sparse: true // Add this line to allow multiple null values
+
   },
   bio: {
     type: String,

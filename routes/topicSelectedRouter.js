@@ -19,10 +19,10 @@ router.post("/", validateToken, chooseTopics);
 
 router.route("/update").post(updateSelectedTopics);
 
-router.get("/getuser", validateToken,getUsersBySelectedTopics);
+router.get("/getuser", validateToken, getUsersBySelectedTopics);
 
-router.get("/getusertopics",validateToken, getSelectedTopics);
+router.get("/getusertopics", validateToken, getSelectedTopics);
 
-router.get("/gettabtopics",validateToken, getTabBarTopics);
+router.get("/gettabtopics", validateToken, getTabBarTopics);
 
 module.exports = router;

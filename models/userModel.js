@@ -9,20 +9,17 @@ const userSchema = mongoose.Schema(
     username: {
       type: String,
       required: [true, "Please add the user name"],
-      unique: [true, "Username already taken"],
+      // unique: [true, "Username already taken"],
     },
     email: {
       type: String,
       required: [true, "Please add the  user email address"],
       unique: [true, "Email address already taken"],
     },
-    alter_email:{
+    alter_email: {
       type: String,
       unique: [true, "Email address already taken"],
-    },
-    password: {
-      type: String,
-      required: [true, "Please add the user password"],
+      sparse: true, // Add this line to allow multiple null values
     },
     bio: {
       type: String,
@@ -35,7 +32,7 @@ const userSchema = mongoose.Schema(
       default:
         "https://firebasestorage.googleapis.com/v0/b/myapp-cbe31.appspot.com/o/Avatar2.png?alt=media&token=0de8f265-809b-4593-a491-651902e7df05",
     },
-    tabbartopics:{
+    tabbartopics: {
       type: [
         {
           _id: { type: mongoose.Schema.Types.ObjectId, ref: "Topic" },
@@ -67,7 +64,7 @@ const userSchema = mongoose.Schema(
     user_website: {
       type: String,
     },
-    user_skills:{
+    user_skills: {
       type: String,
     },
     selected_topics: {

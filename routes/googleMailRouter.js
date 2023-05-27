@@ -2,7 +2,7 @@ const express = require("express");
 
 const router = express.Router();
 
-const {mailSender} = require("../controllers/googleMailController");
+const { mailSender } = require("../controllers/googleMailController");
 
 router.post("/sendemail", mailSender);
 

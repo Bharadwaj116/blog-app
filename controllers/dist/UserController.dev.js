@@ -24,16 +24,16 @@ var User = require("../models/userModel"); // const regex = new RegExp(`^${searc
 
 
 var registerUser = asyncHandler(function _callee(request, response) {
-  var _request$body, name, username, email, password, userAvailable, hashedPassword, user;
+  var _request$body, name, email, existingUser, user;
 
   return regeneratorRuntime.async(function _callee$(_context) {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
           _context.prev = 0;
-          _request$body = request.body, name = _request$body.name, username = _request$body.username, email = _request$body.email, password = _request$body.password;
+          _request$body = request.body, name = _request$body.name, email = _request$body.email;
 
-          if (!(!username || !email || !password)) {
+          if (!(!name || !email)) {
             _context.next = 4;
             break;
           }
@@ -45,78 +45,56 @@ var registerUser = asyncHandler(function _callee(request, response) {
         case 4:
           _context.next = 6;
           return regeneratorRuntime.awrap(User.findOne({
-            email: email
+            name: name
           }));
 
         case 6:
-          userAvailable = _context.sent;
+          existingUser = _context.sent;
 
-          if (!userAvailable) {
-            _context.next = 9;
+          if (!existingUser) {
+            _context.next = 10;
             break;
           }
 
-          return _context.abrupt("return", response.status(404).json({
-            message: "User already registered!"
+          if (!(existingUser.email === email)) {
+            _context.next = 10;
+            break;
+          }
+
+          return _context.abrupt("return", response.status(200).json({
+            message: "Registered Successfully!"
           }));
 
-        case 9:
-          _context.next = 11;
-          return regeneratorRuntime.awrap(bcrypt.hash(password, 10));
-
-        case 11:
-          hashedPassword = _context.sent;
-          console.log("Hashed Password: ", hashedPassword);
+        case 10:
           user = new User({
             name: name,
-            username: username,
-            email: email,
-            password: hashedPassword
+            username: "@".concat(name.toLowerCase().replace(/\s/g, "")),
+            email: email
           });
           console.log(user);
-
-          if (!user) {
-            _context.next = 21;
-            break;
-          }
-
-          _context.next = 18;
+          _context.next = 14;
           return regeneratorRuntime.awrap(user.save());
 
-        case 18:
-          response.status(200).json({
+        case 14:
+          return _context.abrupt("return", response.status(200).json({
             message: "Registered Successfully!"
-          });
-          _context.next = 22;
-          break;
-
-        case 21:
-          return _context.abrupt("return", response.status(404).json({
-            message: "User data is not valid"
           }));
 
-        case 22:
-          response.status(200).json({
-            message: "Register the user"
-          });
-          _context.next = 29;
-          break;
-
-        case 25:
-          _context.prev = 25;
+        case 17:
+          _context.prev = 17;
           _context.t0 = _context["catch"](0);
           console.error(_context.t0);
-          res.status(500).json({
+          return _context.abrupt("return", response.status(500).json({
             success: false,
             message: "Server error"
-          });
+          }));
 
-        case 29:
+        case 21:
         case "end":
           return _context.stop();
       }
     }
-  }, null, null, [[0, 25]]);
+  }, null, null, [[0, 17]]);
 });
 var loginUser = asyncHandler(function _callee2(request, response) {
   var _request$body2, email, password, user, accessToken;

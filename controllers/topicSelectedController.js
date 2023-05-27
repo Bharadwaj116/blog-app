@@ -32,10 +32,10 @@ const chooseTopics = asyncHandler(async (request, response) => {
       icon: "file-document-outline",
     },
     {
-      _id:"646209a1640608eec5778454",
-      topic:"Featured",
-      color:"#3c873a",
-      icon:"star-face",
+      _id: "646209a1640608eec5778454",
+      topic: "Featured",
+      color: "#3c873a",
+      icon: "star-face",
     },
   ];
 
@@ -64,10 +64,7 @@ const chooseTopics = asyncHandler(async (request, response) => {
     })),
   ];
 
-  user.tabbartopics = [
-    ...user.tabbartopics,
-    ...topicsToAdd,
-  ];
+  user.tabbartopics = [...user.tabbartopics, ...topicsToAdd];
 
   user.selected_topics = selectedTopics;
 

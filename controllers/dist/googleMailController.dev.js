@@ -11,6 +11,8 @@ var dotenv = require("dotenv");
 
 var fs = require("fs").promises;
 
+var User = require("../models/userModel");
+
 dotenv.config();
 var clientid = process.env.CLIENT_ID;
 var clientsecret = process.env.CLIENT_SECRET;
@@ -21,13 +23,12 @@ oAuth2Client.setCredentials({
   refresh_token: refreshtoken
 });
 var mailSender = asyncHandler(function _callee(req, res) {
-  var _req$body, sender, recipient, subject, message, htmlContent, accessToken, transporter, info;
-
+  var recipient, htmlContent, accessToken, transporter, info;
   return regeneratorRuntime.async(function _callee$(_context) {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
-          _req$body = req.body, sender = _req$body.sender, recipient = _req$body.recipient, subject = _req$body.subject, message = _req$body.message;
+          recipient = req.body.recipient;
           _context.prev = 1;
           _context.next = 4;
           return regeneratorRuntime.awrap(fs.readFile("./html/index.html", "utf8"));
@@ -45,7 +46,7 @@ var mailSender = asyncHandler(function _callee(req, res) {
             port: 587,
             secure: false,
             auth: {
-              type: 'OAuth2',
+              type: "OAuth2",
               user: "saibharadwaj116@gmail.com",
               clientId: clientid,
               clientSecret: clientsecret,
@@ -55,7 +56,7 @@ var mailSender = asyncHandler(function _callee(req, res) {
           });
           _context.next = 11;
           return regeneratorRuntime.awrap(transporter.sendMail({
-            from: 'Blog App <saibharadwaj116@gmail.com>',
+            from: "BlogIn <saibharadwaj116@gmail.com>",
             to: recipient,
             subject: "Google Gmail Verification Process",
             text: "Google Gmail Verification Succeeded",
@@ -66,26 +67,45 @@ var mailSender = asyncHandler(function _callee(req, res) {
           info = _context.sent;
           console.log("Message sent: %s", info.messageId);
           console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+          _context.next = 16;
+          return regeneratorRuntime.awrap(User.updateOne({
+            email: recipient
+          }));
+
+        case 16:
           res.status(200).json({
+            isverified: true,
+            token: accessToken.token,
             message: "Email sent successfully"
           });
-          _context.next = 21;
+          _context.next = 23;
           break;
 
-        case 17:
-          _context.prev = 17;
+        case 19:
+          _context.prev = 19;
           _context.t0 = _context["catch"](1);
           console.error("Error occurred while sending email:", _context.t0);
-          res.status(500).json({
-            error: "Failed to send email"
-          });
 
-        case 21:
+          if (_context.t0.code === "ECONNECTION" || _context.t0.code === "ETIMEDOUT") {
+            res.status(503).json({
+              error: "Failed to connect to the email server"
+            });
+          } else if (_context.t0.code === "EAUTH") {
+            res.status(401).json({
+              error: "Email authentication failed"
+            });
+          } else {
+            res.status(500).json({
+              error: "Failed to send email"
+            });
+          }
+
+        case 23:
         case "end":
           return _context.stop();
       }
     }
-  }, null, null, [[1, 17]]);
+  }, null, null, [[1, 19]]);
 });
 module.exports = {
   mailSender: mailSender

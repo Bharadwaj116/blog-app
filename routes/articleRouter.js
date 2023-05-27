@@ -30,7 +30,7 @@ router.route("/get").get(getArticles);
 
 router.route("/getlatest").post(validateToken, getLatestArticleCards);
 
-router.route("/").post(validateToken,GetArticle);
+router.route("/").post(validateToken, GetArticle);
 
 router.route("/delete").delete(DeleteArticle);
 

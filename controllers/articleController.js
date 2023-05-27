@@ -407,7 +407,8 @@ const SearchArticles = asyncHandler(async (req, res) => {
     // Remove duplicates
     const uniqueArticles = mergedArticles.filter(
       (article, index, self) =>
-        index === self.findIndex((a) => a._id.toString() === article._id.toString())
+        index ===
+        self.findIndex((a) => a._id.toString() === article._id.toString())
     );
 
     if (uniqueArticles.length === 0) {
@@ -449,7 +450,6 @@ const SearchArticles = asyncHandler(async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
 
 const BookmarkArticle = asyncHandler(async (req, res) => {
   const { ArticleId } = req.body;
@@ -693,7 +693,8 @@ const SearchBookMarkedArticles = asyncHandler(async (req, res) => {
     // Remove duplicates
     const uniqueArticles = mergedArticles.filter(
       (article, index, self) =>
-        index === self.findIndex((a) => a._id.toString() === article._id.toString())
+        index ===
+        self.findIndex((a) => a._id.toString() === article._id.toString())
     );
 
     if (uniqueArticles.length === 0) {
@@ -709,7 +710,8 @@ const SearchBookMarkedArticles = asyncHandler(async (req, res) => {
         (following) => following._id.toString() === authorId.toString()
       );
       const isbookmarked = currentUser.bookmarks.find(
-        (bookmark) => bookmark._id.toString() === uniqueArticles[i]._id.toString()
+        (bookmark) =>
+          bookmark._id.toString() === uniqueArticles[i]._id.toString()
       );
       const currentuser = authorId.toString() === req.user.id.toString();
 
@@ -738,7 +740,6 @@ const SearchBookMarkedArticles = asyncHandler(async (req, res) => {
     });
   }
 });
-
 
 const FilterArticles = asyncHandler(async (req, res) => {
   try {

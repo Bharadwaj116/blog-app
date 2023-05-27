@@ -5,47 +5,42 @@ const User = require("../models/userModel");
 // const regex = new RegExp(`^${searchTerm}`, 'i');
 
 const registerUser = asyncHandler(async (request, response) => {
-  try{
-  const { name, username, email, password } = request.body;
-  if (!username || !email || !password) {
-    return response.status(404).json({
-      message: "All fields are mandatory!",
-    });
-  }
-  const userAvailable = await User.findOne({ email });
-  if (userAvailable) {
-    return response.status(404).json({
-      message: "User already registered!",
-    });
-  }
+  try {
+    const { name, email } = request.body;
+    if (!name || !email) {
+      return response.status(404).json({
+        message: "All fields are mandatory!",
+      });
+    }
+    const existingUser = await User.findOne({ name });
 
-  const hashedPassword = await bcrypt.hash(password, 10);
-  console.log("Hashed Password: ", hashedPassword);
-  const user = new User({
-    name,
-    username,
-    email,
-    password: hashedPassword,
-  });
+    if (existingUser) {
+      if (existingUser.email === email) {
+        return response.status(200).json({
+          message: "Registered Successfully!",
+        });
+      }
+    }
 
-  console.log(user);
-  if (user) {
+    const user = new User({
+      name,
+      username: `@${name.toLowerCase().replace(/\s/g, "")}`,
+      email,
+    });
+
+    console.log(user);
     await user.save();
-    response.status(200).json({
-      message: "Registered Successfully!"
+
+    return response.status(200).json({
+      message: "Registered Successfully!",
     });
-  } else {
-    return response.status(404).json({
-      message: "User data is not valid",
-    });
-  }
-  response.status(200).json({ message: "Register the user" });
-}catch (error) {
+  } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: "Server error" });
+    return response
+      .status(500)
+      .json({ success: false, message: "Server error" });
   }
 });
-
 
 const loginUser = asyncHandler(async (request, response) => {
   const { email, password } = request.body;
@@ -109,7 +104,7 @@ const followUser = asyncHandler(async (request, response) => {
   }
 
   user.followers.push(follower);
-  console.log("follower",follower)
+  console.log("follower", follower);
 
   const currentUser = await User.findById(followerId);
   const isAlreadyFollowing = currentUser.following.some(
@@ -170,7 +165,7 @@ const unfollowUser = asyncHandler(async (request, response) => {
 
   response.status(200).json({
     isfollowing: false,
-    message:`You have followed ${user.username}` ,
+    message: `You have followed ${user.username}`,
   });
 });
 
@@ -257,7 +252,8 @@ const searchUsers = asyncHandler(async (req, res) => {
     // Remove duplicates
     const uniqueUsers = mergedUsers.filter(
       (user, index, self) =>
-        index === self.findIndex((u) => u._id.toString() === user._id.toString())
+        index ===
+        self.findIndex((u) => u._id.toString() === user._id.toString())
     );
 
     if (uniqueUsers.length === 0) {
@@ -286,7 +282,6 @@ const searchUsers = asyncHandler(async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
 
 const getAllUsers = asyncHandler(async (req, res) => {
   try {
