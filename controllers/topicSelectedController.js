@@ -117,7 +117,7 @@ const getUsersBySelectedTopics = asyncHandler(async (request, response) => {
   const currentUser = await User.findById(request.user.id).populate(
     "selected_topics"
   );
-
+  console.log("currentuser",currentUser)
   const users = await User.find({
     selected_topics: { $in: currentUser.selected_topics },
   })
@@ -125,7 +125,7 @@ const getUsersBySelectedTopics = asyncHandler(async (request, response) => {
     .select("profileimage name ");
 
   if (!users) {
-    response.status(404).json({
+    return response.status(404).json({
       message: "No users found with the selected topics",
     });
   }

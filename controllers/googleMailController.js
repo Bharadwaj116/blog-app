@@ -2,8 +2,9 @@ const asyncHandler = require("express-async-handler");
 const { google } = require("googleapis");
 const nodemailer = require("nodemailer");
 const dotenv = require("dotenv");
+const jwt = require("jsonwebtoken");
 const fs = require("fs").promises;
-const User = require("../models/userModel")
+const User = require("../models/userModel");
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ const clientid = process.env.CLIENT_ID;
 const clientsecret = process.env.CLIENT_SECRET;
 const redirecturi = process.env.REDIRECT_URI;
 const refreshtoken = process.env.REFRESH_TOKEN;
+const tokenExpiration = process.env.TOKEN_EXPIRATION; // Token expiration duration
 
 const oAuth2Client = new google.auth.OAuth2(
   clientid,
@@ -55,9 +57,25 @@ const mailSender = asyncHandler(async (req, res) => {
 
     await User.updateOne({ email: recipient });
 
+    let user;
+    user = await User.findOne({ email: recipient });
+
+    const accesstoken = jwt.sign(
+      {
+        user: {
+          name: user.name,
+          username:user.username,
+          email: user.email,
+          id: user.id,
+        },
+      },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: tokenExpiration }
+    );
+
     res.status(200).json({
       isverified: true,
-      token: accessToken.token,
+      token: accesstoken,
       message: "Email sent successfully",
     });
   } catch (error) {

@@ -43,43 +43,29 @@ const registerUser = asyncHandler(async (request, response) => {
 });
 
 const loginUser = asyncHandler(async (request, response) => {
-  const { email, password } = request.body;
-  if (!email || !password) {
-    response.status(400);
-    throw new Error("All fields are mandatory!");
+  const { email } = request.body;
+  if (!email) {
+    return response.status(400).json({ message: "All fields are mandatory!" });
   }
 
   let user;
-  if (/^@/.test(email)) {
-    user = await User.findOne({ username: email });
-  } else if (email != /^@/.test(email)) {
-    user = await User.findOne({ email });
-  } else {
-    response.status(401);
-    throw new Error("Invalid username or password");
-  }
+  user = await User.findOne({ email });
 
-  if (user && (await bcrypt.compare(password, user.password))) {
-    const accessToken = jwt.sign(
-      {
-        user: {
-          name: user.name,
-          username: user.username,
-          email: user.email,
-          id: user.id,
-        },
+  const accessToken = jwt.sign(
+    {
+      user: {
+        name: user.name,
+        email: user.email,
+        id: user.id,
       },
-      process.env.ACCESS_TOKEN_SECERT,
-      { expiresIn: "10080m" }
-    );
-    response.status(200).json({
-      accessToken,
-      message: "Login Successfully!",
-    });
-  } else {
-    response.status(401);
-    throw new Error("Invalid email or password");
-  }
+    },
+    process.env.CLIENT_SECRET,
+    { expiresIn: "10080m" }
+  );
+  return response.status(200).json({
+    accessToken,
+    message: "Login Successful!",
+  });
 });
 
 const currentUser = asyncHandler(async (request, response) => {

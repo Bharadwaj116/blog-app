@@ -62,7 +62,7 @@ const callbackGithub = async (req, res) => {
   }
 };
 
-module.exports = {
+module.exports = { 
   authorizeGithub,
   callbackGithub,
 };
