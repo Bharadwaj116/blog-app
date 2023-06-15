@@ -12,7 +12,7 @@ const clientid = process.env.CLIENT_ID;
 const clientsecret = process.env.CLIENT_SECRET;
 const redirecturi = process.env.REDIRECT_URI;
 const refreshtoken = process.env.REFRESH_TOKEN;
-const tokenExpiration = process.env.TOKEN_EXPIRATION; // Token expiration duration
+const tokenExpiration = process.env.TOKEN_EXPIRATION;
 
 const oAuth2Client = new google.auth.OAuth2(
   clientid,
