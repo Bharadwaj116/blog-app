@@ -16,6 +16,9 @@ const userSchema = mongoose.Schema(
       required: [true, "Please add the  user email address"],
       unique: [true, "Email address already taken"],
     },
+    token: {
+      type: String,
+    },
     alter_email: {
       type: String,
       unique: [true, "Email address already taken"],

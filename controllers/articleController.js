@@ -151,6 +151,7 @@ const DeleteArticle = asyncHandler(async (request, response) => {
 const getLatestArticleCards = asyncHandler(async (req, res) => {
   try {
     const currentUser = await User.findById(req.user.id);
+    // console.log("currentuser",currentUser)
     const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
     const articles = await Article.find({ createdAt: { $gte: oneDayAgo } })
       .select(
@@ -160,18 +161,18 @@ const getLatestArticleCards = asyncHandler(async (req, res) => {
       .sort({ createdAt: -1 });
 
     for (let i = 0; i < articles.length; i++) {
-      const authorId = articles[i].user_id._id;
+      const authorId = articles[i]?.user_id?._id;
       const author = await User.findById(authorId);
-      const user_image = author.profileimage;
-      const user_name = author.name;
-      const isfollowing = author.followers.some(
+      const user_image = author?.profileimage;
+      const user_name = author?.name;
+      const isfollowing = author?.followers.some(
         (follower) => follower._id.toString() === currentUser._id.toString()
       );
-      const isbookmarked = currentUser.bookmarks.find(
+      const isbookmarked = currentUser?.bookmarks.find(
         (bookmark) => bookmark._id.toString() === articles[i]._id.toString()
       );
 
-      const currentuser = authorId.toString() === currentUser._id.toString();
+      const currentuser = authorId?.toString() === currentUser?._id?.toString();
 
       const clappedByCurrentUser = articles[i].clappedBy.find(
         (clapper) => clapper._id.toString() === currentUser._id.toString()
@@ -418,17 +419,17 @@ const SearchArticles = asyncHandler(async (req, res) => {
     }
 
     for (let i = 0; i < uniqueArticles.length; i++) {
-      const authorId = uniqueArticles[i].user_id._id;
+      const authorId = uniqueArticles[i]?.user_id?._id;
       const author = await User.findById(authorId);
-      const user_image = author.profileimage;
-      const user_name = author.name;
+      const user_image = author?.profileimage;
+      const user_name = author?.name;
       const isfollowing = currentUser.following.some(
-        (following) => following._id.toString() === authorId.toString()
+        (following) => following?._id?.toString() === authorId?.toString()
       );
-      const currentuser = authorId.toString() === req.user.id.toString();
+      const currentuser = authorId?.toString() === req.user.id?.toString();
 
       const clappedByCurrentUser = uniqueArticles[i].clappedBy.find(
-        (clapper) => clapper._id.toString() === currentUser._id.toString()
+        (clapper) => clapper?._id?.toString() === currentUser?._id?.toString()
       );
       const isclapped = clappedByCurrentUser
         ? clappedByCurrentUser.isclapped
@@ -532,18 +533,18 @@ const GetUserBookmarks = asyncHandler(async (req, res) => {
     .exec();
 
   for (let i = 0; i < articles.length; i++) {
-    const authorId = articles[i].user_id._id;
+    const authorId = articles[i]?.user_id?._id;
     const author = await User.findById(authorId);
     const user_image = author.profileimage;
     const user_name = author.name;
-    const isfollowing = author.followers.some(
+    const isfollowing = author?.followers?.some(
       (follower) => follower._id.toString() === currentUser._id.toString()
     );
-    const isbookmarked = currentUser.bookmarks.find(
-      (bookmark) => bookmark._id.toString() === articles[i]._id.toString()
+    const isbookmarked = currentUser?.bookmarks?.find(
+      (bookmark) => bookmark?._id.toString() === articles[i]?._id?.toString()
     );
 
-    const currentuser = authorId.toString() === req.user.id.toString();
+    const currentuser = authorId?.toString() === req.user.id?.toString();
 
     const clappedByCurrentUser = articles[i].clappedBy.find(
       (clapper) => clapper._id.toString() === currentUser._id.toString()
@@ -704,19 +705,19 @@ const SearchBookMarkedArticles = asyncHandler(async (req, res) => {
     }
 
     for (let i = 0; i < uniqueArticles.length; i++) {
-      const authorId = uniqueArticles[i].user_id;
+      const authorId = uniqueArticles[i]?.user_id;
       const author = await User.findById(authorId);
-      const isfollowing = currentUser.following.some(
-        (following) => following._id.toString() === authorId.toString()
+      const isfollowing = currentUser?.following.some(
+        (following) => following?._id?.toString() === authorId?.toString()
       );
-      const isbookmarked = currentUser.bookmarks.find(
+      const isbookmarked = currentUser?.bookmarks.find(
         (bookmark) =>
-          bookmark._id.toString() === uniqueArticles[i]._id.toString()
+          bookmark._id?.toString() === uniqueArticles[i]?._id.toString()
       );
-      const currentuser = authorId.toString() === req.user.id.toString();
+      const currentuser = authorId?.toString() === req.user.id?.toString();
 
-      const clappedByCurrentUser = uniqueArticles[i].clappedBy.find(
-        (clapper) => clapper._id.toString() === currentUser._id.toString()
+      const clappedByCurrentUser = uniqueArticles[i]?.clappedBy?.find(
+        (clapper) => clapper?._id?.toString() === currentUser?._id?.toString()
       );
       const isclapped = clappedByCurrentUser
         ? clappedByCurrentUser.isclapped

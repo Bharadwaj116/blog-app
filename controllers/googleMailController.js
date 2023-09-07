@@ -29,6 +29,8 @@ const mailSender = asyncHandler(async (req, res) => {
 
     const accessToken = await oAuth2Client.getAccessToken();
 
+    console.log("accesstoken",accessToken)
+
     const transporter = nodemailer.createTransport({
       service: "gmail",
       host: "smtp.gmail.com",
@@ -47,7 +49,7 @@ const mailSender = asyncHandler(async (req, res) => {
     const info = await transporter.sendMail({
       from: "BlogIn <saibharadwaj116@gmail.com>",
       to: recipient,
-      subject: "Google Gmail Verification Process",
+      subject: "Welcome to BlogIn!",
       text: "Google Gmail Verification Succeeded",
       html: htmlContent,
     });
@@ -55,16 +57,18 @@ const mailSender = asyncHandler(async (req, res) => {
     console.log("Message sent: %s", info.messageId);
     console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
 
-    await User.updateOne({ email: recipient });
-
     let user;
     user = await User.findOne({ email: recipient });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
     const accesstoken = jwt.sign(
       {
         user: {
           name: user.name,
-          username:user.username,
+          username: user.username,
           email: user.email,
           id: user.id,
         },
@@ -72,6 +76,9 @@ const mailSender = asyncHandler(async (req, res) => {
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: tokenExpiration }
     );
+
+    user.token = accesstoken;
+    await user.save();
 
     res.status(200).json({
       isverified: true,

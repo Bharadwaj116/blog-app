@@ -12,19 +12,33 @@ const registerUser = asyncHandler(async (request, response) => {
         message: "All fields are mandatory!",
       });
     }
-    const existingUser = await User.findOne({ name });
+
+    const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      if (existingUser.email === email) {
-        return response.status(200).json({
-          message: "Registered Successfully!",
-        });
+      return response.status(200).json({
+        message: "User with the same email already exists!",
+      });
+    }
+
+    let username = `@${name.toLowerCase().replace(/\s/g, "")}`;
+    let count = 1;
+
+    while (true) {
+      const existinguser = await User.findOne({ username });
+      if (!existinguser) {
+        break;
       }
+
+      count++;
+      username = `@${name.toLowerCase().replace(/\s/g, "")}${count
+        .toString()
+        .padStart(2, "0")}`;
     }
 
     const user = new User({
       name,
-      username: `@${name.toLowerCase().replace(/\s/g, "")}`,
+      username,
       email,
     });
 
@@ -51,6 +65,10 @@ const loginUser = asyncHandler(async (request, response) => {
   let user;
   user = await User.findOne({ email });
 
+  if (!user) {
+    return res.status(404).json({ error: "User not found" });
+  }
+
   const accessToken = jwt.sign(
     {
       user: {
@@ -62,6 +80,8 @@ const loginUser = asyncHandler(async (request, response) => {
     process.env.CLIENT_SECRET,
     { expiresIn: "10080m" }
   );
+  user.token = accessToken;
+  await user.save();
   return response.status(200).json({
     accessToken,
     message: "Login Successful!",
