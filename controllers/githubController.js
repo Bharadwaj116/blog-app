@@ -6,7 +6,7 @@ dotenv.config();
 
 const clientId = process.env.GITHUB_ID;
 const clientSecret = process.env.GITHUB_SECRET;
-const redirectUri = "http://localhost:5004/github/callback";
+const redirectUri = "https://blog-app-backend.cyclic.app/github/callback";
 
 const authorizeGithub = (req, res) => {
   const params = querystring.stringify({
@@ -14,6 +14,7 @@ const authorizeGithub = (req, res) => {
     redirect_uri: redirectUri,
     scope: "user",
   });
+  console.log("params",params)
 
   res.redirect(`https://github.com/login/oauth/authorize?${params}`);
 };
@@ -39,8 +40,6 @@ const callbackGithub = async (req, res) => {
     );
 
     const accessToken = response.data.access_token;
-
-    // Use the access token to get user data
     const userResponse = await axios.get("https://api.github.com/user", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
